@@ -1,7 +1,7 @@
 name: ACO Autonomous Routine
 
 on:
-  workflow_dispatch: # 手動実行
+  workflow_dispatch: # 手動実行ボタンを表示
 
 jobs:
   run-aco-logic:
