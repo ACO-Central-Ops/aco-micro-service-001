@@ -1,21 +1,25 @@
 name: ACO Autonomous Routine
 
 on:
-  schedule:
-    - cron: '0 * * * *' # 1時間に1回、自動実行
-  workflow_dispatch:      # 手動実行も可能にする
+  workflow_dispatch: # 手動実行
 
 jobs:
   run-aco-logic:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.12'
 
-      - name: Run Market Monitor
-        run: python market_monitor.py
+      - name: Install dependencies
+        run: |
+          pip install gspread google-auth
+
+      - name: Run Ledger Test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: python ledger_test.py
