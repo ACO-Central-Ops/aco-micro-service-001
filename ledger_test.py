@@ -17,7 +17,7 @@ gc = gspread.authorize(creds)
 
 # 2. スプレッドシートの操作
 # 【重要】ここにスプレッドシートのIDを貼り付けてください
-SPREADSHEET_ID = '1H3SkOr4hO_13Xyf0LTcOO1AVKWMddQW-sG5ng0geX1g/edit'
+SPREADSHEET_ID = '1H3SkOr4hO_13Xyf0LTcOO1AVKWMddQW-sG5ng0geX1g'
 
 def write_test_log():
     try:
