@@ -5,7 +5,10 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # 認証スコープ
-scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/documents'
 
 # スプレッドシートID
 SPREADSHEET_ID = '1H3SkOr4hO_13Xyf0LTcOO1AVKWMddQW-sG5ng0geX1g'
