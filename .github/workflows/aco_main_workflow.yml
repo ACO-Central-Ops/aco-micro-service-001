@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pip install gspread google-auth
 
-     - name: Step 1 Financial Record
+      - name: Step 1 Financial Record
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
@@ -39,11 +39,11 @@ jobs:
         run: python market_scan.py
 
       - name: Step 3 Send COO Report
-        run: python send_report_mail.py
         env:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: python send_report_mail.py
 
       - name: Step 4 Auto-Commit and Push
         run: |
