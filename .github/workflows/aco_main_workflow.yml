@@ -1,16 +1,25 @@
-name: ACO Full Operational Routine
+name: ACO Full Operational Routine (Self-Update Mode)
 
 on:
   schedule:
-    - cron: '0 2 * * 1' # 毎週月曜 11:00 JST (UTC 2:00)
+    - cron: '0 2 * * 1' # 毎週月曜 11:00 JST
   workflow_dispatch: # 手動実行ボタン
 
 jobs:
   operational-loop:
     runs-on: ubuntu-latest
+    
+    # リポジトリへの書き込み権限を許可
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          # オーナーが設定したマスターキー(GH_PAT)を使用
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -20,17 +29,33 @@ jobs:
       - name: Install dependencies
         run: pip install gspread google-auth
 
-      - name: Step 1: Financial Record (CFO)
+      - name: Step 1: Financial Record (CFO/Accountant)
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: python ledger_test.py
 
-      - name: Step 2: Market Scan (CMO)
+      - name: Step 2: Market Scan (CMO/BizDev)
         run: python market_scan.py
 
-      - name: Step 3: Send COO Report (COO)
+      - name: Step 3: Run COO Ops & Report Generation
+        id: report
         env:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: python send_report_mail.py
+        run: |
+          # 報告メールを送信し、もしコードに修正があればファイルを更新する
+          python send_report_mail.py
+
+      - name: Step 4: Auto-Commit & Push (The Worker's Hand)
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "ACO-Auto-Bot"
+          git add .
+          # 変更がある場合のみコミットしてPush
+          if ! git diff --cached --quiet; then
+            git commit -m "ACO: 自律的なシステム更新とログの反映 [skip ci]"
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
