@@ -26,10 +26,14 @@ jobs:
       - name: Install dependencies
         run: pip install gspread google-auth
 
-      - name: Step 1 Financial Record
-        run: python ledger_test.py
+     - name: Step 1 Financial Record
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo "=== File Check ==="
+          ls -R
+          echo "=== Execution ==="
+          python ledger_test.py
 
       - name: Step 2 Market Scan
         run: python market_scan.py
