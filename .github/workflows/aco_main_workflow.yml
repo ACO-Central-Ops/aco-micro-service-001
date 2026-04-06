@@ -36,7 +36,7 @@ jobs:
           python ledger_test.py
 
       - name: Step 2 Market Scan
-        run: python market_scan.py
+        run: python market_monitor.py
 
       - name: Step 3 Send COO Report
         env:
