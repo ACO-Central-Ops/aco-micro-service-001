@@ -33,7 +33,7 @@ jobs:
           if [ -f ledger_test.py ]; then
             python ledger_test.py
           else
-            echo "ledger_test.py not found"
+            echo "File not found: ledger_test.py"
           fi
 
       - name: Step 2 Market Scan
@@ -41,7 +41,7 @@ jobs:
           if [ -f market_scan.py ]; then
             python market_scan.py
           else
-            echo "market_scan.py not found"
+            echo "File not found: market_scan.py"
           fi
 
       - name: Step 3 Send COO Report
@@ -53,7 +53,7 @@ jobs:
           if [ -f send_report_mail.py ]; then
             python send_report_mail.py
           else
-            echo "send_report_mail.py not found"
+            echo "File not found: send_report_mail.py"
           fi
 
       - name: Step 4 Auto-Commit and Push
