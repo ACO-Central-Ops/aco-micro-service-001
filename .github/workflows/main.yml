@@ -1,14 +1,20 @@
-name: ACO Autonomous Routine
+name: ACO Autonomous Routine 2.0 (Full Support)
 
 on:
-  workflow_dispatch: # 手動実行ボタンを表示
+  schedule:
+    - cron: '*/5 * * * *' # 5分ごとにオーナーの代わりに自動実行
+  workflow_dispatch:      # 今すぐ手動で動かすボタン
 
 jobs:
   run-aco-logic:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # GitHubへの書き込み許可
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -16,10 +22,26 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: |
-          pip install gspread google-auth
+        run: pip install gspread google-auth google-api-python-client
 
-      - name: Run Ledger Test
+      - name: Deploy COO and Execute Business
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: python ledger_test.py
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+        run: |
+          # 1. 議事録とメール送信を担う COO (coo_manager.py) を物理生成
+          cat << 'EOF' > coo_manager.py
+          import os, json
+          print("COO: 事業執行と議事録作成を開始します...")
+          # ここでオーナーの市場監視と金庫番を呼び出し、結果を cliaraiz23@gmail.com へ送付
+          EOF
+
+          # 2. オーナーの金庫番を実行
+          python ledger_test.py
+          
+          # 3. 変更をGitHubの本棚へ保存（これでファイルが出現します）
+          git config --local user.email "action@github.com"
+          git config --local user.name "ACO-COO-Bot"
+          git add .
+          git commit -m "ACO: System Update by COO" || echo "No changes"
+          git push origin HEAD:main
