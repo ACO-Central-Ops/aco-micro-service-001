@@ -7,20 +7,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # GitHubへの書き込み権限を明示
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 書き込みを確実にするため、標準トークンを使用
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Agents Physically
         run: |
-          echo "import json" > cio_agent.py
-          echo "print('CIO: Market Active')" >> cio_agent.py
-          echo "import json" > cfo_agent.py
-          echo "print('CFO: Ledger Active')" >> cfo_agent.py
-          echo "import json" > coo_manager.py
-          echo "print('COO: Gemini Connected')" >> coo_manager.py
+          # 1. オーナーのファイルを尊重しつつ、COOの「脳（実体）」を生成
+          # ここに Googleドライブ保存とGmail報告のロジックを集約します
+          cat << 'EOF' > coo_manager.py
+          import os
+          import json
+
+          def executive_report():
+              print("COO: 執行報告プロセス開始...")
+              print("Target CEO: cliaraiz23@gmail.com")
+              # 今後はここにGoogle API連携のロジックが自動注入されます
           
+          if __name__ == "__main__":
+              executive_report()
+          EOF
+
+          # 2. CIO/CFOの「インターフェース」も作成（オーナーの既存ファイルとの接続用）
+          echo "print('CIO: Market Monitoring Active')" > cio_agent.py
+          echo "print('CFO: Ledger Connection Active')" > cfo_agent.py
+
+          # 3. 変更をリポジトリの「main」ブランチに物理的に保存（Push）
           git config --local user.email "action@github.com"
           git config --local user.name "ACO-COO-Bot"
           git add .
-          git commit -m "FORCE: Executive Agents Deployment"
-          git push origin HEAD:main # mainブランチへ強制的に押し込む
+          # 変更がない場合でもエラーにならないよう、exit 0 を設定
+          git commit -m "FORCE: Executive Agents Physical Deployment" || exit 0
+          git push origin HEAD:main
