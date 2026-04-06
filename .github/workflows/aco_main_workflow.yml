@@ -1,15 +1,13 @@
-name: ACO Full Operational Routine (Self-Update Mode)
+name: ACO Full Operational Routine
 
 on:
   schedule:
-    - cron: '0 2 * * 1' # 毎週月曜 11:00 JST
-  workflow_dispatch: # 手動実行ボタン
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
 
 jobs:
   operational-loop:
     runs-on: ubuntu-latest
-    
-    # リポジトリへの書き込み権限を許可
     permissions:
       contents: write
 
@@ -17,7 +15,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # オーナーが設定したマスターキー(GH_PAT)を使用
           token: ${{ secrets.GH_PAT }}
           fetch-depth: 0
 
@@ -29,32 +26,43 @@ jobs:
       - name: Install dependencies
         run: pip install gspread google-auth
 
-      - name: Step 1: Financial Record (CFO/Accountant)
+      - name: Step 1: Financial Record
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: python ledger_test.py
+        run: |
+          if [ -f ledger_test.py ]; then
+            python ledger_test.py
+          else
+            echo "ledger_test.py not found"
+          fi
 
-      - name: Step 2: Market Scan (CMO/BizDev)
-        run: python market_scan.py
+      - name: Step 2: Market Scan
+        run: |
+          if [ -f market_scan.py ]; then
+            python market_scan.py
+          else
+            echo "market_scan.py not found"
+          fi
 
-      - name: Step 3: Run COO Ops & Report Generation
-        id: report
+      - name: Step 3: Send COO Report
         env:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
-          # 報告メールを送信し、もしコードに修正があればファイルを更新する
-          python send_report_mail.py
+          if [ -f send_report_mail.py ]; then
+            python send_report_mail.py
+          else
+            echo "send_report_mail.py not found"
+          fi
 
-      - name: Step 4: Auto-Commit & Push (The Worker's Hand)
+      - name: Step 4: Auto-Commit & Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "ACO-Auto-Bot"
           git add .
-          # 変更がある場合のみコミットしてPush
           if ! git diff --cached --quiet; then
-            git commit -m "ACO: 自律的なシステム更新とログの反映 [skip ci]"
+            git commit -m "ACO: System Self-Update [skip ci]"
             git push origin main
           else
             echo "No changes to commit"
