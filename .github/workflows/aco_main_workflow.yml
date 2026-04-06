@@ -27,34 +27,19 @@ jobs:
         run: pip install gspread google-auth
 
       - name: Step 1 Financial Record
+        run: python ledger_test.py
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: |
-          if [ -f ledger_test.py ]; then
-            python ledger_test.py
-          else
-            echo "File not found: ledger_test.py"
-          fi
 
       - name: Step 2 Market Scan
-        run: |
-          if [ -f market_scan.py ]; then
-            python market_scan.py
-          else
-            echo "File not found: market_scan.py"
-          fi
+        run: python market_scan.py
 
       - name: Step 3 Send COO Report
+        run: python send_report_mail.py
         env:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: |
-          if [ -f send_report_mail.py ]; then
-            python send_report_mail.py
-          else
-            echo "File not found: send_report_mail.py"
-          fi
 
       - name: Step 4 Auto-Commit and Push
         run: |
