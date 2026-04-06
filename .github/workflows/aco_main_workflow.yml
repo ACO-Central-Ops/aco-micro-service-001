@@ -1,0 +1,36 @@
+name: ACO Full Operational Routine
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # 毎週月曜 11:00 JST (UTC 2:00)
+  workflow_dispatch: # 手動実行ボタン
+
+jobs:
+  operational-loop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install gspread google-auth
+
+      - name: Step 1: Financial Record (CFO)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: python ledger_test.py
+
+      - name: Step 2: Market Scan (CMO)
+        run: python market_scan.py
+
+      - name: Step 3: Send COO Report (COO)
+        env:
+          MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: python send_report_mail.py
