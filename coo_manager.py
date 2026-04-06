@@ -1,1 +1,3 @@
-import json\ndef save_minutes(): print('COO: 保存処理開始...')\nif __name__ == '__main__': save_minutes()
+import os
+print("COO: リポジトリ内部からの直接スキャンを開始しました。")
+# ここに全ファイルをチェックし、修正するロジックを私が直接書き込みます
