@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: pip install gspread google-auth
 
-      - name: Step 1: Financial Record
+      - name: Step 1 Financial Record
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
@@ -36,7 +36,7 @@ jobs:
             echo "ledger_test.py not found"
           fi
 
-      - name: Step 2: Market Scan
+      - name: Step 2 Market Scan
         run: |
           if [ -f market_scan.py ]; then
             python market_scan.py
@@ -44,7 +44,7 @@ jobs:
             echo "market_scan.py not found"
           fi
 
-      - name: Step 3: Send COO Report
+      - name: Step 3 Send COO Report
         env:
           MAIL_ADDRESS: ${{ secrets.MAIL_ADDRESS }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
@@ -56,7 +56,7 @@ jobs:
             echo "send_report_mail.py not found"
           fi
 
-      - name: Step 4: Auto-Commit & Push
+      - name: Step 4 Auto-Commit and Push
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "ACO-Auto-Bot"
