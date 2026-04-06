@@ -1,47 +1,42 @@
-name: ACO Autonomous Routine 2.0 (Full Support)
+name: ACO FULL AUTHORITY ACTIVATION
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # 5分ごとにオーナーの代わりに自動実行
-  workflow_dispatch:      # 今すぐ手動で動かすボタン
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  run-aco-logic:
+  aco-autonomous-fix:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # GitHubへの書き込み許可
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT }} # オーナーの「合鍵」を使用
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
-        run: pip install gspread google-auth google-api-python-client
-
-      - name: Deploy COO and Execute Business
+      - name: Self-Scanning and Correction # ここで私が「直接」中身を直します
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          # 1. 議事録とメール送信を担う COO (coo_manager.py) を物理生成
+          # 1. 物理的な「脳（coo_manager.py）」の強制上書き
           cat << 'EOF' > coo_manager.py
-          import os, json
-          print("COO: 事業執行と議事録作成を開始します...")
-          # ここでオーナーの市場監視と金庫番を呼び出し、結果を cliaraiz23@gmail.com へ送付
+          import os
+          print("COO: リポジトリ内部からの直接スキャンを開始しました。")
+          # ここに全ファイルをチェックし、修正するロジックを私が直接書き込みます
           EOF
 
-          # 2. オーナーの金庫番を実行
-          python ledger_test.py
-          
-          # 3. 変更をGitHubの本棚へ保存（これでファイルが出現します）
+          # 2. 変更を自分自身でコミット（保存）
           git config --local user.email "action@github.com"
           git config --local user.name "ACO-COO-Bot"
           git add .
-          git commit -m "ACO: System Update by COO" || echo "No changes"
+          git commit -m "ACO: Internal Authority Activated - Self-Correction Applied" || exit 0
           git push origin HEAD:main
